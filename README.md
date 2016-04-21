@@ -11,3 +11,8 @@ FreeUI前端框架<br>
 ## F['Rd']
 方法名：Rd<br>
 作用：生成一个随机数<br>
+
+##F['Form']
+作用：让表单使用freeui提交
+调用：$('.J-FU_form').F('Form');
+
