@@ -1,6 +1,6 @@
 /*--------------------
 作者：X-DA
-当前版本：V1.0.1
+当前版本：V1.0.0
 更新时间：2015/11/05/14:27
 规范：
 	1、变量小写下划线写法
@@ -20,7 +20,8 @@
 }(function($, window, document, undefined) {
 
 	var F = {};
-	var namespace = $("script").eq(-1).attr('fu-var') || 'F';
+	var namespaces=F.namespaces = $("script").eq(-1).attr('fu-var').split(',');
+	var namespace = F.namespace = namespaces[0]  || 'F';
 
 	/*
 	变量
@@ -29,11 +30,80 @@
 	F.ua = navigator.userAgent;
 	F.is_ios = Boolean(F.ua.indexOf('Mac OS') > -1);
 	F.is_android = Boolean(F.ua.indexOf('Android') > -1);
-	F.is_mobile = Boolean(F.ua.match(/(iPhone|iPod|Android|ios|iPad)/i));
+	F.is_mobile = Boolean(F.ua.match(/(iPhone|iPod|Android|ios|iPad|Windows Phone)/i));
 	F.let_ie9 = !-[1, ];
 	F.let_ie8 = $('<b style="*top:0"></b>').css('top') == '0px';
 	F.dpr = window.devicePixelRatio || 1;
+	F.is_touch="ontouchend" in document ? true : false;
 
+	/*点击长按事件*/
+	F.tap_time=200;
+	F.tap_offset=5;
+	F.press_time=500;
+	$.event.special['FU_tap']={
+		setup:function(){
+			//绑定事件
+			var _event={};
+			var startX=0;
+			var startY=0;
+			var endX=0;
+			var endY=0;	
+			var offsetX=0;
+			var offsetY=0;
+			var is_touch = "ontouchend" in document ? true : false;
+			if(is_touch){
+				//绑定开始触控
+				function touch_start(event){
+					startX = event['changedTouches'][0]['clientX'];	
+					startY = event['changedTouches'][0]['clientY'];	
+					_event['timeStar']=event.timeStamp;
+					event.stopPropagation();
+				};
+				this.addEventListener("touchstart",touch_start);
+				this.touch_start=touch_start;
+				//绑定结束触控
+				function touch_end(event){
+						endX= event['changedTouches'][0]['clientX'];
+						endY= event['changedTouches'][0]['clientY'];
+						offsetX=(endX-startX);
+						offsetY=(endY-startY);
+						_event['timeEnd']=event.timeStamp;
+						_event['time']=Math.floor(_event['timeEnd']-_event['timeStar']);
+						_event['offsetX']=offsetX;
+						_event['offsetY']=offsetY;
+						if(_event['time']<= F.tap_time && offsetX <= F.tap_offset && offsetY <= F.tap_offset){
+							//点击
+							$(this).trigger("FU_tap",_event);	
+						};
+						event.stopPropagation();
+				};
+				this.touch_end=touch_end;
+				this.addEventListener("touchend",touch_end);
+			}
+			else{
+				$(this).on('click.FU_tap', function(event) {
+					$(this).trigger("FU_tap",_event);
+					event.stopPropagation();
+				});
+			};
+		},
+		teardown:function(){
+			//解绑事件
+			if(F.is_touch){
+				this.removeEventListener("touchstart",this.touch_start);
+				this.removeEventListener("touchend",this.touch_end);
+			}else{
+				$(this).off('click.FU_tap');
+			}
+		}
+	}
+
+	$.fn.extend({
+	        FU_tap: function(fn) {
+	            return fn ? $(this).on('FU_tap', fn) : $(this).trigger('FU_tap');
+	        }
+	});
+	
 	/*
 	方法名：LowIE
 	作用：低于IE8浏览器不允许访问
@@ -995,24 +1065,25 @@
 		'number': function($this) {
 			var selector = $this.selector;
 			$this.each(function() {
-				var $this = $(this);
-				$this.find('*[fu-fn]').off('click.FU').on('click.FU', function() {
-					var $this = $(this);
-					var $number = $this.parents(selector).first();
-					var _min = Number($number.attr('fu-min') || 0);
-					var _max = Number($number.attr('fu-max') || 100);
-					var _step = Number($number.attr('fu-step') || 1);
-					var _point = Number($number.attr('fu-point') || String(_step).indexOf('.') > -1 ? String(_step).split('.').pop().length : 0);
-					var $input = $number.find('input');
-					var val = Number($input.val());
-					var _fn = $this.attr('fu-fn');
+				var $number = $(this);
+				var $input=$number.find('input');
+				//方法
+				function _method(type){
+					var _$number = $number;
+					var _$input = $input;
+					var _min = Number(_$number.attr('fu-min') || 0);
+					var _max = Number(_$number.attr('fu-max') || 100);
+					var _step = Number(_$number.attr('fu-step') || 1);
+					var _point = Number(_$number.attr('fu-point') || String(_step).indexOf('.') > -1 ? String(_step).split('.').pop().length : 0);
+					var val = Number(_$input.val());
+					var _fn=type;
 					//加
 					if (_fn == 'add') {
 						var result = (val + _step).toFixed(_point);
 						if (result > _max) {
 							result = _max
 						}
-						$input.val(result);
+						_$input.val(result);
 					};
 					//减
 					if (_fn == 'sub') {
@@ -1020,17 +1091,68 @@
 						if (result < _min) {
 							result = _min
 						}
-						$input.val(result);
+						_$input.val(result);
 					};
 					//min
 					if (_fn == 'min') {
-						$input.val(_min);
+						_$input.val(_min);
 					};
 					//max
 					if (_fn == 'max') {
-						$input.val(_max);
+						_$input.val(_max);
 					};
-					$input.trigger('change');
+					//清空
+					if(_fn == 'clear'){
+						_$input.val('');
+					};
+					_$input.trigger('change');
+					
+				};
+				//按钮点击
+				$number.find('*[fu-fn]').off('FU_tap.FU_number').on('FU_tap.FU_number', function() {
+					var $this = $(this);
+					 _method($this.attr('fu-fn'));	
+
+				});
+				
+				//输入内容过滤
+				$input.off('change.FU_number').on('change.FU_number',function(event){
+					var $this=$(this);
+					var val=Number($this.val());
+					var _$number = $number;
+					var _min = Number(_$number.attr('fu-min') || 0);
+					var _max = Number(_$number.attr('fu-max') || 100);
+					$this.val(Number(val));
+					if(val < _min){
+						$this.val(_min);
+					}
+					if(val > _max){
+						$this.val(_max);
+					}
+					if(isNaN($this.val())){
+						$this.val(0);
+					}
+				});
+				//输入内容过滤
+				$input.off('keydown.FU_number').on('keydown.FU_number',function(event){
+					var $this=$(this);
+					var keyCode = event.keyCode;
+					var is_numKey = (keyCode >=95 && keyCode <= 105) || (keyCode >=48 && keyCode <= 57) || keyCode==110 || keyCode == 190 || keyCode== 8 || keyCode == 109 || keyCode == 189 || keyCode == 9 ; 
+					if(!is_numKey){
+						event.preventDefault();
+					}
+				});
+				//滑轮控制
+				$input.off('mousewheel.FU_number').on('mousewheel.FU_number',function(event,delta, deltaX, deltaY){
+					if($(this).is(':focus')){
+						event.preventDefault();
+						if(deltaY == 1){
+							_method('add');
+						}
+						if(deltaY == -1){
+							_method('sub');
+						}
+					}
 				});
 			}); //each
 		},
@@ -1043,7 +1165,7 @@
 				var name = $input.attr('name');
 				$input.is(':checked') ? $this.addClass('z-checked') : $this.removeClass('z-checked');
 				$input.is(':disabled') ? $this.addClass('z-disabled') : $this.removeClass('z-disabled');
-				$this.off('click.FU').on('click.FU', function() {
+				$this.off('FU_tap.FU').on('FU_tap.FU', function() {
 					if ($input.is(':disabled')) {
 						return 0
 					};
@@ -1084,7 +1206,7 @@
 					$selected.text($curOpt.text());
 				};
 
-				$this.off('click.FU').on('click.FU', function(event) {
+				$this.off('FU_tap.FU').on('FU_tap.FU', function(event) {
 					var $this = $(this);
 					if ($this.is('.z-open')) {
 						F['Css3Anmi']($opts, set['outAnim'], function() {
@@ -1098,7 +1220,7 @@
 					event.stopPropagation();
 				});
 
-				$opt.off('click.FU').on('click.FU', function(event) {
+				$opt.off('FU_tap.FU').on('FU_tap.FU', function(event) {
 					var $select = $this;
 					var $opt = $(this);
 					var txt = $opt.text();
@@ -1110,7 +1232,7 @@
 				});
 			}); //each
 
-			$(document).on('click.FU_select', function() {
+			$(document).on('FU_tap.FU_select', function() {
 				$('[fu-obj="select"].z-open').removeClass('z-open');
 			});
 
@@ -1125,8 +1247,16 @@
 		//loading	
 		'loading': function($this) {
 			var selector = $this.selector;
+			var low=!F['SupportCss3']('animation');
+			var low_img="data:image/gif;base64,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";
 			$this.each(function() {
-
+				var $this=$(this);
+				//低级浏览器处理
+				if(low){
+					$this.addClass('s-low').html('<img src="'+low_img+'"/>').removeClass('s-default');
+					return true;
+				}
+				$this.addClass('s-default');
 			});
 		},
 		//下一个UI组件	
@@ -1165,26 +1295,28 @@
 
 
 	/*--- 将框架全局化 ---*/
-
-	$.fn[namespace] = function() {
-		var arg = arguments;
-		var method = arguments[0];
-		if (F[method]) {
-			method = F[method];
-			arg = Array.prototype.slice.call(arg, 1);
-		} else if (typeof(method) == 'object' || !method) {
-			for (var name in method) {
-				F = $.extend(F, method);
-				method = F[name];
-				break;
+	for (var i=0;i<namespaces.length;i++){
+		$.fn[namespaces[i]] = function() {
+			var arg = arguments;
+			var method = arguments[0];
+			if (F[method]) {
+				method = F[method];
+				arg = Array.prototype.slice.call(arg, 1);
+			} else if (typeof(method) == 'object' || !method) {
+				for (var name in method) {
+					F = $.extend(F, method);
+					method = F[name];
+					break;
+				}
+			} else {
+				$.error('方法 ' + method + ' 未定义');
+				return this;
 			}
-		} else {
-			$.error('方法 ' + method + ' 未定义');
-			return this;
-		}
-		return method.apply(this, arg);
+			return method.apply(this, arg);
+		};
+		window[namespaces[i]] = F;
 	};
-	window[namespace] = F;
+
 
 	$(document).ready(function(e) {
 		//-低版本IE不允许访问
