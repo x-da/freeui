@@ -3,8 +3,8 @@
 当前版本：V1.0.0
 更新时间：2015/11/05/14:27
 规范：
-	1、变量小写下划线写法
-	2、方法首字母大写驼峰写法
+	1、变量首字母小写，加下划线。
+   	2、方法首字母大写，驼峰写法。
 --------------------*/
 
 /* ----- [freeUI JS] ----- */
@@ -39,7 +39,29 @@
 	/*点击长按事件*/
 	F.tap_time=200;
 	F.tap_offset=5;
-	F.press_time=500;
+
+
+	/*
+	检测滚动条宽度
+	*/
+	F.scrollbar_width=0;
+
+	/*
+	方法名：ParseJSON
+	作用：将字符串转成JSON
+	*/
+	F['ParseJSON']=function(str){
+		try {
+			return $.parseJSON(str);
+		}catch(e){
+			try {
+				return eval('(' + str + ')');
+			} catch (e) {
+				return {};
+			}
+		}
+	};
+
 	$.event.special['FU_tap']={
 		setup:function(){
 			//绑定事件
@@ -192,11 +214,11 @@
 	方法名：SupportCss3
 	作用：判断浏览器是否支持某一个CSS3属性
 	使用：F.SupportCss3('CSS属性名')
-	使用示例：F.SupportCss3('anmi');
+	使用示例：F.SupportCss3('anim');
 	版本更新：v1.0.0
 	*/
 	F['SupportCss3'] = function(style) {
-		var prefix = ['webkit', 'Moz', 'ms', 'o'],
+		var prefix = ['webkit', 'moz', 'ms', 'o'],
 			i,
 			humpString = [],
 			htmlStyle = document.documentElement.style,
@@ -217,47 +239,47 @@
 
 
 	/*
-	方法名：Css3Anmi
+	方法名：Css3Anim
 	作用：执行CSS3动画
-	使用：F['Css3Anmi'](Jquery对象,动画值，动画结束回调)
-	使用示例：F['Css3Anmi']($(this),'zoomOut .2s ease .1s  both',function(){alert('动画结束')})
+	使用：F['Css3Anim'](Jquery对象,动画值，动画结束回调)
+	使用示例：F['Css3Anim']($(this),'zoomOut .2s ease .1s  both',function(){alert('动画结束')})
 	版本更新：v1.0.1
 	*/
-	F['anmi'] = F['SupportCss3']('animation'); //是否开启动画
-	F['Css3Anmi'] = function(t, css, callback) {
+	F['anim'] = F['SupportCss3']('animation'); //是否开启动画
+	F['Css3Anim'] = function(t, css, callback) {
 		var callback = callback || function() {};
 		var css = F['Space'](String(css));
 		if (!Boolean(css) || t.length < 1) {
 			return callback();
 		}
 		var css_arr = css.split(' ');
-		var anmi_name = css_arr[0];
-		var anmi_time = F['Css3Anmi']['cache'][anmi_name] || 0;
+		var anim_name = css_arr[0];
+		var anim_time = F['Css3Anim']['cache'][anim_name] || 0;
 
 		//动画所需时间
-		if (anmi_time == 0) {
+		if (anim_time == 0) {
 			for (var i = 1; i < css_arr.length; i++) {
 				//获得总时间
 				if (css_arr[i].indexOf('s') > -1) {
 					var time = Number(css_arr[i].replace(/s/i, '')) || 0;
-					anmi_time += time;
+					anim_time += time;
 				};
 			};
-			anmi_time *= 1000;
-			F['Css3Anmi']['cache'][anmi_name] = anmi_time;
+			anim_time *= 1000;
+			F['Css3Anim']['cache'][anim_name] = anim_time;
 		}
 		//执行动画	
-		if (F['anmi']) {
+		if (F['anim']) {
 			t.css('animation', css);
 			setTimeout(function() {
 				t.css('animation', '');
 				callback();
-			}, anmi_time);
+			}, anim_time);
 		} else {
 			callback();
 		};
 	};
-	F['Css3Anmi']['cache'] = {};
+	F['Css3Anim']['cache'] = {};
 	/*
 	方法名：Share
 	作用：返回分享链接
@@ -287,7 +309,7 @@
 		desc: $('meta[name="description"]').attr('content') || '', //分享内容
 		imgs: '', //分享图片
 		link: window.location.origin + window.location.pathname //分享地址
-	}
+	};
 
 	/*
 	方法名：LoadImg
@@ -653,166 +675,178 @@
 	版本更新：v1.0.0
 	*/
 	F['Modal'] = function(act, opt) {
-		var $this = this;
+		var $this = $(this);
+		var act=act || 'toggle' ;
 		if ($this.length < 1) {
-			return false
+			return false;
 		};
-		var defaults = F['Modal']['conf'];
-		var set = $.extend({}, defaults, opt);
-		$(set['shade']).off('click', shade).on('click', shade);
-		var selector = set['selector'];
+		$this.attr('fu-obj','modal');
+		//处理配置项
+		var set = $.extend(true,{}, F['Modal']['conf'], opt ,F['ParseJSON']($this.attr('fu-conf')));
+		//需要用到的变量
 		var body_scrollTop = $(window).scrollTop();
+		var $shade=$('.U-FU_shade'+set['shadeSkin']);
+		var _method={};
 
 
-		//定义方法
-		var method = {};
-		method[act] = method[act] || function() {};
-		method['show'] = function() {
-			popshow($this, set.showback);
-		}
-		method['hide'] = function() {
-			popclose($this, set.hideback);
-		}
-		method['toggle'] = function() {
-			popclose();
-			popshow($this, set.callback);
-		}
-		method[act]();
+		//show方法
+		_method['in'] = function () {
+			if($this.is(':visible')){return $this};
+			//是否锁定滚动条
+			if(set['lockScroll']){
+				$('html').css({
+					'margin-right':(F['Modal']['html_mr']+F.scrollbar_width)+'px',
+					'overflow':'hidden'
+				});
+				//移动端影响body滚动
+				$('body,html,window').off('touchmove.modal').on('touchmove.modal', function(event) {
+					if ($('*[fu-obj="modal"]').is(':visible')) {
+						event.preventDefault();
+					}
+				});
+			};
 
-		function pop_size($pop, pct) {
-			var win_h = $(window).innerHeight();
-			var pop_h = $pop.outerHeight();
-			var $ct = $pop.children(set['ctdom']);
-			var out_h = 0;
-			var pct = pct || 0.8;
-			$ct.siblings().each(function(index, element) {
-				var $this = $(this);
-				var position = $this.css('position');
-				if (position == 'static' || position == 'relative') {
-					out_h += $this.outerHeight();
-				}
+			_method['position']();
+			$shade.addClass('z-lock');
+			if ($shade.is(':hidden') && set['shade'] ) {
+				$shade.fadeIn('fast');
+			}
+			$this.show();
+			//CSS3动画出来
+			F['Css3Anim']($this, set['inAnim'], function() {
+				$shade.removeClass('z-lock');
+				set['inBack']();
 			});
-			$pop.css('top', '50%');
-			$ct.css('max-height', (win_h * pct - out_h) + 'px');
+			//存储到关闭队列
+			var shadeClose=F['Modal']['shadeClose'];
+			var shadeLock=$this.is('.z-lock') || set['lockShade'];
+			if(!shadeLock){
+				shadeClose.push($this[0]);
+			};
+			//绑定关闭事件
+			$this.find('.j-close').off('FU_tap.modal').on('FU_tap.modal',function(event) {
+				$(this).parents('[fu-obj="modal"]')[namespace]('Modal','out');
+			});
+		};
+		//hide方法
+		_method['out'] = function (){
+			 var shadeClose=F['Modal']['shadeClose'];		
+			 shadeClose.splice($.inArray($this[0],shadeClose),1);
+			if(shadeClose.length < 1){
+				//所有都关完后
+				//是否锁定滚动条
+				if(set['lockScroll']){
+					$('html').css({
+						'margin-right':F['Modal']['html_mr']+'px',
+					});
+					$('html').css('overflow',F['Modal']['html_overflow']);
+					//移动端影响body滚动
+					$('body,html,window').off('touchmove.modal');
+				};					
+				$shade.fadeOut('fast');
+			}
+			$shade.addClass('z-lock');
+			//CSS3动画出去
+			F['Css3Anim']($this, set['outAnim'], function() {
+				$shade.removeClass('z-lock');
+				$this.hide();
+				set['outBack']();
+			});
 		};
 
-		function shade() {
-			if (!$(selector + ':visible').is('.z-lock')) {
-				popclose();
-			}
-		} //shade
 
-		function popclose($a, callback) {
-			var $this = $(this);
-			var $a = $a || $(selector + ':visible');
-			var callback = callback || $.noop;
-			//$('body').css('overflow','');
-			if ($(selector + ':visible').length <= 1) {
-				$(set['shade']).fadeOut('fast');
-			}
-			F['Css3Anmi']($a, set['hideanmi'], function() {
-				$a.hide();
-				callback();
-			});
-			//$(window).scrollTop(body_scrollTop);
-		}
-
-		function popshow($pop, callback) {
+		//position方法，更正弹层位置
+		_method['position']=function(){
 			var win_h = $(window).innerHeight();
-			var pop_h = $pop.outerHeight();
-			var callback = callback || function() {};
 
-			//初始化处理
-			//$('body').css('overflow','hidden');	
-			//$(set['shade']).off('click',shade);
-			body_scrollTop = $(window).scrollTop();
-			//如果弹层超过屏幕高度80%
-			if (pop_h > win_h * 0.8) {
-				pop_size($pop, 0.8);
-			}
-			//如果需要垂直居中处理
-			if ($pop.is('.s-mid')) {
-				$pop.css('margin-top', (set['contain'].offset().top - $pop.outerHeight()) * 0.5 + 'px');
-			}
-			$pop.css('margin-left', (set['contain'].offset().left - $pop.outerWidth()) * 0.5 + 'px');
-			//如果是有输入框情况
-			if ($pop.is('.s-input') && F.is_ios) {
-				$pop.css('position', 'absolute');
-				$pop.css('top', (win_h * 0.45 + body_scrollTop));
-			}
-			//阴影出来
-			$(set['shade']).fadeIn('fast');
-
-			//是否有滚动条
-			var $ct = $pop.children(set['ctdom']);
-			if ($ct.length > 0) {
-				var is_scroll = $ct[0].scrollHeight > $ct.css('max-height').replace('px', '');
-				if (is_scroll && app.ua.indexOf('Android') > -1) {
-					$ct.css('opacity', '0');
+			//处理滚动条
+			var $scroll = $this.children('.j-scroll') ;
+			var bro_h=0;
+			var pct = 0.8;
+			$scroll.siblings().each(function(index, element) {
+				var $bro = $(this);
+				var position = $bro.css('position');
+				if (position == 'static' || position == 'relative') {
+					bro_h += $bro.outerHeight();
 				}
-			};
-			$pop.show();
-			//CSS3动画出来
-			F['Css3Anmi']($pop, set['showanmi'], function() {
-				if (is_scroll && app.ua.indexOf('Android') > -1) {
-					$ct.css('opacity', '1');
-				}
-				callback();
 			});
-		}
-		$this.find('.j-close').each(function(index, element) {
-			var $close = $(this);
-			$close.off('click.close').on('click.close', function() {
-				popclose($this);
-			});
-		});
+			$scroll.css('max-height', (win_h * pct - bro_h) + 'px');
 
-		//防止内滚动影响外部滚动条
-		$this.children('.ct').off('touchmove.ct').on('touchmove.ct', function(event) {
-			var $ct = $(this);
-			//$(window).scrollTop(body_scrollTop);
-			if ($ct[0].scrollHeight != $ct[0].clientHeight) {
-				event.stopPropagation();
-			}
-		});
-		$('body').off('touchmove.modal').on('touchmove.modal', function(event) {
-			if ($(selector).is(':visible')) {
-				event.preventDefault();
-			}
-		});
+			//防止内滚动影响外部滚动条
+			$scroll.off('touchmove.modal').on('touchmove.modal', function(event) {
+				if ($scroll[0].scrollHeight != $scroll[0].clientHeight) {
+					event.stopPropagation();
+				};
+			});
+			
+
+			//垂直居中
+			$this.css({
+				"left": '50%',
+				"top":'50%',
+				"margin-left": '-' + $this.outerWidth() * 0.5 + 'px',
+				"margin-top": '-' + $this.outerHeight() * 0.5 + 'px'
+			});
+			
+			//浏览器窗口改变后，调整位置
+			$(window).off('resize.modal').on('resize.modal',function(event){
+				$('*[fu-obj="modal"]').each(function(index, el) {
+					$(this)[namespace]('Modal','position');
+				});	
+			});
+
+		};
+
+
+		
+
+		(_method[act] || $.noop)();
 		return $this;
-
 	};
 
-	//弹窗show方法
-	F['Modal']['show'] = function($dom, set) {
+	//遮罩关闭弹层顺序
+	F['Modal']['shadeClose']=[];
 
-	};
-
-	//配置项
+	//默认配置项
 	F['Modal']['conf'] = {
-		selector: '.m-FU_modal' || '', //需要弹窗出来的节点
-		shade: '#U-FU_shade', //阴影节点
-		ctdom: '.ct', //内容节点，用于做滚动
-		anmi: true, //是否开启动画
-		showanmi: 'FU_modalIn .3s ease  both', //弹窗显示时动画
-		hideanmi: 'FU_modalOut .3s ease  both', //弹窗关闭时动画
-		showback: $.noop(), //出来后回调
-		hideback: $.noop(), //关闭后回调
-		contain: $('html'), //容器
-		scrolllock: false //是否锁住滚动条
+		shade:true,//是否出现阴影
+		shadeSkin: '', //阴影皮肤类名
+		inAnim: 'FU_modalIn .3s ease  both', //弹窗显示时动画
+		outAnim: 'FU_modalOut .3s ease  both', //弹窗关闭时动画
+		inBack: $.noop, //出来后回调
+		outBack: $.noop, //关闭后回调
+		lockScroll: true, //是否锁住滚动条
+		lockShade:false //点击阴影是否可以关闭弹层
 	};
-
-	(function() {
+	//初始化弹层
+	F['Modal']['init']=function() {
 		//初始化遮罩
-		if ($('#U-FU_shade').length < 1) {
-			$('body').append('<div id="U-FU_shade"></div>');
+		if ($('.U-FU_shade').length < 1) {
+			$('body').append('<div class="U-FU_shade"></div>');
 		};
 		//记录滚动条情况
-		F['Modal']['html_overflow'] = $('body').css('overflow');
+		F['Modal']['html_overflow'] = $('html').css('overflow');
 		F['Modal']['body_overflow'] = $('body').css('overflow');
+		F['Modal']['html_mr']=Number($('html').css('margin-right').replace('px',''));
+		//绑定遮罩点击事件
+		$('.U-FU_shade').on('FU_tap', function(event) {
+			if($(this).is('.z-lock')){return 0;}
+			var shadeClose =F['Modal']['shadeClose'];
+			$(shadeClose[shadeClose.length - 1 ])[namespace]('Modal','out');
+			event.stopPropagation();
+		});
 
-	})();
+		//绑定触发器
+		$('*[fu-modalin]').on('FU_tap', function(event) {
+			$($(this).attr('fu-modalin')+'*[fu-obj="modal"]')[namespace]('Modal','in',F['ParseJSON']($(this).attr('fu-conf')));
+		});
+		$('*[fu-modalout]').on('FU_tap', function(event) {
+			$($(this).attr('fu-modalout')+'*[fu-obj="modal"]')[namespace]('Modal','out',F['ParseJSON']($(this).attr('fu-conf')));
+		});
+
+	};
+	
+
 
 	/*
 	方法名字：Hint
@@ -834,12 +868,12 @@
 			$hint.css('margin-top', (set['contain'].offset().top - $hint.outerHeight()) * 0.5 + 'px');
 			$hint.css('margin-left', (set['contain'].offset().left - $hint.outerWidth()) * 0.5 + 'px');
 			$hint.show();
-			F['Css3Anmi']($hint, set['showanmi'], function() {
-				set.startback();
+			F['Css3Anim']($hint, set['inAnim'], function() {
+				set.inBack();
 				var hide = setTimeout(function() {
-					F['Css3Anmi']($hint, set['hideanmi'], function() {
+					F['Css3Anim']($hint, set['outAnim'], function() {
 						$hint.remove();
-						set.endback();
+						set.outBack();
 					})
 				}, set.time)
 			});
@@ -851,10 +885,10 @@
 		ct: '出错',
 		type: 0,
 		time: 1000,
-		startback: $.noop,
-		endback: $.noop,
-		showanmi: 'FU_hintIn .3s ease  both',
-		hideanmi: 'FU_hintOut .3s ease  both',
+		inBack: $.noop,
+		outBack: $.noop,
+		inAnim: 'FU_hintIn .3s ease  both',
+		outAnim: 'FU_hintOut .3s ease  both',
 		font: ['&#xe600;', '&#xe602;', '&#xe601;'],
 		contain: $('html')
 	};
@@ -1043,15 +1077,10 @@
 		"onVerify": F['Form']['verify'], //数据验证处理函数
 		"ajax": null, //ajax参数
 		"check": true //实时验证
-			//"success":''
-			//"error":''
 	};
 
 
 
-	F['test'] = function() {
-		return $(this);
-	}
 
 	/* ----- [UI控件JS] ----- */
 	F['Ui'] = function(type, opt) {
@@ -1062,24 +1091,43 @@
 
 	F['Ui']['widget'] = {
 		//数字输入框
-		'number': function($this) {
+		'number': function($this,opt) {
 			var selector = $this.selector;
+			var set = $.extend({}, F['Ui']['conf']['number'], opt);
+			
 			$this.each(function() {
 				var $number = $(this);
 				var $input=$number.find('input');
+				$this.attr('fu-obj', 'number');
 				//方法
 				function _method(type){
 					var _$number = $number;
 					var _$input = $input;
-					var _min = Number(_$number.attr('fu-min') || 0);
-					var _max = Number(_$number.attr('fu-max') || 100);
-					var _step = Number(_$number.attr('fu-step') || 1);
-					var _point = Number(_$number.attr('fu-point') || String(_step).indexOf('.') > -1 ? String(_step).split('.').pop().length : 0);
+					var _min = Number(_$number.attr('fu-min') || set['min']);
+					var _max = Number(_$number.attr('fu-max') || set['max']);
+					var _step = Number(_$number.attr('fu-step') || set['step']);
+					var _point = Number(_$number.attr('fu-point') || set['point'] || String(_step).indexOf('.') > -1 ? String(_step).split('.').pop().length : 0);
 					var val = Number(_$input.val());
 					var _fn=type;
+					//输入内容过滤
+					if(_fn == 'correct'){
+						_$input.val(Number(val));
+						if(val < _min){
+							_$input.val(_min);
+						}
+						if(val > _max){
+							_$input.val(_max);
+						}
+						if(isNaN(_$input.val())){
+							_$input.val(0);
+						}
+						return 1;
+					};
+
 					//加
 					if (_fn == 'add') {
 						var result = (val + _step).toFixed(_point);
+
 						if (result > _max) {
 							result = _max
 						}
@@ -1112,26 +1160,11 @@
 				$number.find('*[fu-fn]').off('FU_tap.FU_number').on('FU_tap.FU_number', function() {
 					var $this = $(this);
 					 _method($this.attr('fu-fn'));	
-
 				});
 				
 				//输入内容过滤
 				$input.off('change.FU_number').on('change.FU_number',function(event){
-					var $this=$(this);
-					var val=Number($this.val());
-					var _$number = $number;
-					var _min = Number(_$number.attr('fu-min') || 0);
-					var _max = Number(_$number.attr('fu-max') || 100);
-					$this.val(Number(val));
-					if(val < _min){
-						$this.val(_min);
-					}
-					if(val > _max){
-						$this.val(_max);
-					}
-					if(isNaN($this.val())){
-						$this.val(0);
-					}
+					_method('correct');
 				});
 				//输入内容过滤
 				$input.off('keydown.FU_number').on('keydown.FU_number',function(event){
@@ -1209,13 +1242,13 @@
 				$this.off('FU_tap.FU').on('FU_tap.FU', function(event) {
 					var $this = $(this);
 					if ($this.is('.z-open')) {
-						F['Css3Anmi']($opts, set['outAnim'], function() {
+						F['Css3Anim']($opts, set['outAnim'], function() {
 							$this.removeClass('z-open');
 						});
 					} else {
 						$('[fu-obj="select"].z-open').removeClass('z-open');
 						$this.addClass('z-open');
-						F['Css3Anmi']($opts, set['inAnim']);
+						F['Css3Anim']($opts, set['inAnim']);
 					};
 					event.stopPropagation();
 				});
@@ -1275,6 +1308,12 @@
 		'select': {
 			inAnim: 'FU_fadeInBot .1s linear',
 			outAnim: 'FU_fadeOutBot .1s linear'
+		},
+		//输入输入框
+		'number':{
+			min:0,
+			max:100,
+			step:1
 		}
 
 	};
@@ -1322,8 +1361,21 @@
 		//-低版本IE不允许访问
 		F['LowIE']();
 		//-文档准备就绪初始化UI组件
-		window[namespace]['Ui']['init']();
-
+		F['Ui']['init']();
+		//-滚动条宽度
+		(function(){
+			$('body').append('<div class="f-FU_scrollWidth"><div></div></div>');
+			var $scrollWidth=$('.f-FU_scrollWidth');
+			var no_scroll=$scrollWidth.children().width();
+			var is_scroll=$scrollWidth.css('overflow-y','scroll').children().width();
+			F.scrollbar_width= (no_scroll - is_scroll) || 0;
+			$scrollWidth.remove();
+		})();
+		//初始化弹层
+		F['Modal']['init']();
+		//初始化表单提交
+		$('.J-FU_form')[namespace]('Form');
+		
 	});
 
 	return $.widget;

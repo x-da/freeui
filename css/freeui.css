@@ -296,6 +296,8 @@ html.s-wap{ -webkit-user-select:none; }
     filter: progid: DXImageTransform.Microsoft.Blur(PixelRadius='5');
 }
 
+.f-FU_scrollWidth{ position:absolute; left: -200px; width: 100px; height: 100px; overflow-y: hidden; top: -100px;}
+.f-FU_scrollWidth div{ height: 200px;}
 
 /*--- 风格 ---*/
 
@@ -319,7 +321,7 @@ html.s-wap{ -webkit-user-select:none; }
 }
 
 .i-FU_icon {
-    font-family: "fuicon";
+    font-family: "fuicon" !important;
     font-size: 1em;
     font-style: normal;
     -webkit-font-smoothing: antialiased;
@@ -1053,11 +1055,11 @@ html.s-wap{ -webkit-user-select:none; }
 
 /*遮罩*/
 
-#U-FU_shade {
+.U-FU_shade {
     background-color: #000;
     opacity: 0.6;
     filter: alpha(opacity=60);
-    position: absolute;
+    position:fixed;
     left: 0;
     top: 0;
     width: 100%;
@@ -1128,31 +1130,30 @@ html.s-wap{ -webkit-user-select:none; }
 .m-FU_modal {
     width: 90%;
     max-width: 360px;
-    border: 5px solid rgba(10, 10, 10, 0.2);
-    background-clip: padding-box;
-    border-radius: 5px;
+    /*border: 6px solid rgba(255, 255, 255, 0.2);
+    background-clip: padding-box;*/
 }
 
-.m-FU_modal > .title {
+.m-FU_modal > .p-title {
     margin: 0 10px;
     padding: 10px 0;
     font-size: 24px;
 }
 
-.m-FU_modal > .close {
-    color: #F44F53;
+.m-FU_modal > .p-close {
     font-size: 20px;
-    width: 30px;
-    height: 30px;
-    line-height: 30px;
-    right: -10px;
-    top: -10px;
-    border-radius: 30px;
+    width: 20px;
+    height: 20px;
+    line-height: 20px;
+    right: 10px;
+    top: 8px;
+    border-radius: 0;
 }
 
-.m-FU_modal > .ct {
+.m-FU_modal > .p-ct {
     font-size: 14px;
     margin: 10px;
+
 }
 
 .m-FU_modal {
@@ -1162,35 +1163,39 @@ html.s-wap{ -webkit-user-select:none; }
     top: 10%;
     z-index: 10;
     display: none;
+    border-radius: 5px;
     -webkit-transform: translateZ(0);
     transform: translateZ(0);
     will-change: transform, opacity;
     -webkit-will-change: transform, opacity;
 }
 
-.m-FU_modal > .title {
+.m-FU_modal > .p-title {
     position: relative;
     border-bottom: 1px solid #d7d7d7;
     text-align: center;
     color: #333;
 }
 
-.m-FU_modal .close {
+.m-FU_modal .p-close {
     position: absolute;
     text-align: center;
     z-index: 5;
-    background-color: #fff;
     cursor: pointer;
+    color:#d4d4d4;
 }
-
-.m-FU_modal > .ct {
+.m-FU_modal .p-close:hover{
+    color: #F44F53;
+}
+.m-FU_modal > .p-ct {
     overflow-y: auto;
     line-height: 1.4;
     -webkit-overflow-scrolling: touch;
+    overflow-y:auto;
 }
 
 .m-FU_modal.s-mid {
-    top: 38.2%;
+    top: 38.2% !important;
 }
 
 
