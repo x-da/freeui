@@ -72,8 +72,7 @@
 			var endY=0;	
 			var offsetX=0;
 			var offsetY=0;
-			var is_touch = "ontouchend" in document ? true : false;
-			if(is_touch){
+			if(F['is_touch']){
 				//绑定开始触控
 				function touch_start(event){
 					startX = event['changedTouches'][0]['clientX'];	
@@ -164,10 +163,10 @@
 
 	/*
 	方法名：Rd
-	作用：生成一个随机数
+	作用：生成一个随机整数
 	*/
 	F['Rd'] = function(num) {
-		var num = num || 255;
+		var num = Number(num || 255);
 		return parseInt(num * Math.random());
 	};
 	/*
@@ -254,10 +253,11 @@
 		}
 		var css_arr = css.split(' ');
 		var anim_name = css_arr[0];
-		var anim_time = F['Css3Anim']['cache'][anim_name] || 0;
+		var anim_time = 0;
+		//var anim_time = F['Css3Anim']['cache'][anim_name] || 0;
 
 		//动画所需时间
-		if (anim_time == 0) {
+		//if (anim_time == 0) {
 			for (var i = 1; i < css_arr.length; i++) {
 				//获得总时间
 				if (css_arr[i].indexOf('s') > -1) {
@@ -266,8 +266,8 @@
 				};
 			};
 			anim_time *= 1000;
-			F['Css3Anim']['cache'][anim_name] = anim_time;
-		}
+			//F['Css3Anim']['cache'][anim_name] = anim_time;
+		//}
 		//执行动画	
 		if (F['anim']) {
 			t.css('animation', css);
@@ -279,19 +279,23 @@
 			callback();
 		};
 	};
-	F['Css3Anim']['cache'] = {};
+	//F['Css3Anim']['cache'] = {};
 	/*
 	方法名：Share
 	作用：返回分享链接
 	使用：F['Share']()
 	版本更新：v1.0.0
 	*/
-	F['Share'] = function(type, opt) {
-		var set = $.extend({}, F['Share']['conf'], opt);
-		F['Share']['type'][type] = F['Share']['type'][type] || function(opt) {
-			return '#';
-		};
-		return F['Share']['type'][type](set);
+	F['Share'] = function(opt) {
+		var $this=$(this);
+		var def=F['Share']['conf'];
+		var set = $.extend({},def, opt);
+		$this.find('*[fu-share]').each(function(index, el) {
+			var $link=$(this);
+			var type=$link.attr('fu-share');
+			$link.attr('href',(F['Share']['type'][type](set) || def['link']));
+		});
+		return F['Share']['type'] ;
 	}
 	F['Share']['type'] = {
 		'qzone': function(opt) {
@@ -302,13 +306,16 @@
 		},
 		'tweibo': function(opt) {
 			return 'http://share.v.t.qq.com/index.php?c=share&a=index&title=' + opt.desc + '&url=' + opt.link + '&pic=' + opt.imgs;
+		},
+		'qfriend':function(opt){
+			return 'http://connect.qq.com/widget/shareqq/index.html?url='+opt.link+'&title='+opt.title+'&desc='+opt.desc+'&summary='+opt.desc+'&pics='+opt.imgs+'&showshares=true#jtss-cqq&showcount=0';
 		}
 	}
 	F['Share']['conf'] = {
 		title: document.title, //分享标题
 		desc: $('meta[name="description"]').attr('content') || '', //分享内容
 		imgs: '', //分享图片
-		link: window.location.origin + window.location.pathname //分享地址
+		link: location.protocol +'//'+location.host+location.pathname //分享地址
 	};
 
 	/*
@@ -327,30 +334,31 @@
 		img.src = src;
 		img.onload = ok;
 		img.onerror = err;
-	}
+	};
 
-	F['Qn'] = function(src, opt, mode) {
-		var src = src || '';
-		var mode = mode || 1;
+
+	F['Qn'] = function(src,opt) {
+		if(!src){return false;}
 		var defaults = {
-			w: false,
-			h: false,
-			format: false,
-			interlace: 1,
-			q: false,
-			original: false
+			"mode":"0", 
+			"interlace":"1",
+			"ignore-error":"1" 
 		}
 		var original = src.split('?imageView2/')[0];
 		if (!Boolean(opt)) {
 			return original;
 		}
 		var set = $.extend({}, defaults, opt);
-		var backSrc = original + '?imageView2/' + mode;
+		var backSrc = original + '?';
 		for (var i in set) {
-			if (set[i]) {
-				backSrc += '/' + i + '/' + set[i];
+			var par = '/' + i  ;
+			if(par == '/mode'){
+				par='imageView2';
 			}
-		}
+			if (par) {
+				backSrc += par + '/' + set[i];
+			};
+		};
 		return backSrc;
 	}
 
@@ -361,54 +369,58 @@
 	版本更新：v1.0.0
 	*/
 	F['LazyImg'] = function(opt) {
-			var defaults = F['LazyImg']['conf'];
-			var set = $.extend({}, defaults, opt);
-			var $img_arr = {};
+
+			var def = F['LazyImg']['conf'];
+			var set = $.extend({}, def, opt);
+			//z-ready,z-load,z-loaded
+			var $img_arr = [];
 			//遍历图片
-			$(set.wrap).find('img[' + set.attr + ']').each(function(index, element) {
+			$(set.wrap).find('*[' + set.attr + ']').each(function(index, element) {
 				var $this = $(this);
-				if ($this.is('.' + set.loading)) {
+				if ($this.is('.z-ready,.z-load,.z-loaded')) {
 					return false;
 				};
 				$img_arr[index] = $this;
-				$this.addClass(set.loading);
+				$this.addClass('z-ready');
 			});
 
 			//滚动事件
 			function _scroll() {
-				var size = 0;
-				for (var i in $img_arr) {
-					var $this = $img_arr[i];
+				var img_arr=$img_arr;
+				for (var i = 0; i < img_arr.length; i++) {
+					var $this=img_arr[i];
 					var offtop = $this.offset().top - $(set.wrap).offset().top;
 					var offleft = $this.offset().left - $(set.wrap).offset().left;
 					if (set.wrap == 'body' || set.wrap == 'html') {
 						offtop -= set.scrollTop();
 						offleft -= set.scrollLeft();
-					}
+					};
 					if (set.innerHeight() >= (offtop - set.offsetT) && set.innerWidth() >= (offleft - set.offsetL)) {
-						delete $img_arr[i];
+						 img_arr.splice(i, 1);
 						_load_img($this, set);
-					}
-					size++
-				}
-				if (size == 0) {
-					set.eventdom.off(set.event, _scroll);
-				}
-			}
+					};
+				};
+				if(img_arr.length == 0){
+					set['eventdom'].off(set.event, _scroll);
+				};
+			};
 			//绑定事件
 			if (set.event) {
-				set.eventdom.on(set.event, _scroll);
+				set['eventdom'].on(set.event, _scroll);
 			}
 			_scroll();
 			F['LazyImg']['refresh'] = _scroll;
+
+
 			//替换图片
 			function _load_img($this, set) {
 				var attr = set.attr;
-				var df_src = $this.attr('src');
+				var is_img=$this.is('img');
+				var df_src = $this.attr('src') || $this.css('background-image');
 				var src = $this.attr(attr);
 				//计算最佳宽
 				var $parent = $this.parent();
-				var PixelRatio = window.devicePixelRatio || 1; //设备像素比
+				var dpr = F['dpr']; //设备像素比
 				var win_w = window.screen.width; //窗口实际宽度
 				var pcss_w = $parent[0].style.width;
 				var css_w = $this[0].style.width;
@@ -428,17 +440,14 @@
 				if (css_w) {
 					w = css_w.split('px')[0];
 				}
-				//类名优先级最高
-				var $qn_width = $this.parents(set.qnClass).first();
-				if ($qn_width.length > 0) {
-					w = $qn_width.innerWidth()
-				}
-				w = Math.round(w * PixelRatio);
-				//计算结束
+				//DPR计算
+				w = Math.round(w * dpr);
+
+				//计算结束开始加载图片
 				var img = new Image();
-				if (set.qn) {
+				if (set['qn']) {
 					var qn = {};
-					$.extend({}, qn, set.qn);
+					$.extend({}, qn, set['qn']);
 					qn.w = set.qn.w || w;
 					img.src = F['Qn'](src, qn);
 				} else {
@@ -446,25 +455,34 @@
 				}
 				//加载成功
 				img.onload = function() {
-						$this.attr('src', img.src).removeAttr(attr).removeClass(set.loading);
-						$this.addClass(set.loaded);
-						set.load($this);
-					}
-					//加载失败
+					if(is_img){
+						$this.attr('src', img.src);
+					}else{
+						$this.css('background-image','url('+img.src+')');
+					};
+					$this.removeAttr(attr).removeClass('z-load').addClass(set.loaded);
+					img.remove();
+					set['load']($this);
+				};
+				//加载失败
 				img.onerror = function() {
-					$this.addClass(set.loaderr).removeClass(set.loading);
-					$this.attr('src', df_src);
-					set.error($this);
-				}
-			} //_load_img
+					if(is_img){
+						$this.attr('src',df_src);
+					}else{
+						$this.css('background-image',df_src);
+					};
+					$this.addClass('.z-err').removeClass('z-load').addClass('z-ready');
+					set['error']($this);
+				};
+			}; //_load_img
 
 
 
-		} //LazyImg
+	}; //LazyImg
 
 	//配置项
 	F['LazyImg']['conf'] = {
-		attr: 'data-src',
+		attr: 'fu-src',
 		wrap: 'body', //容器
 		scrollTop: function() {
 			return $(window).scrollTop()
@@ -479,16 +497,12 @@
 			return $(window).innerHeight()
 		}, //滚动容器高度
 		eventdom: $(window),
-		event: 'scroll',
+		event: 'scroll.LazyImg',
 		offsetL: 0,
 		offsetT: 0,
 		load: $.noop,
 		error: $.noop,
-		loading: 'z-loading',
-		loaded: 'z-loaded',
-		loaderr: 'z-loaderr',
 		qn: {}, //使用七牛
-		qnClass: '.j-qn_width'
 	};
 
 	/*
@@ -920,42 +934,8 @@
 
 			$this.conf = set;
 
-			/*
-			//是否实时检查数据是否正确
-			if(set['check']){
-				//监听值改变和DOM改变
-				$this.find('*[fu-verify]').each(function(){
-					var $verify=$(this);
-					var $form=$verify.parents(selector).first();
-					//值改变
-					$verify.off('change.FU input.FU').on('change.FU input.FU',function(){
-						var verify_arr = fn_check($form,$verify);
-						if(verify_arr){
-							var $submit=$form.find(set['submit']);
-							set['onVerify']({'errs':verify_arr,'form':$form,'submit':$submit,'trig':$verify});
-						};
-					});
-				});
-			};
-		
-			//验证函数
-			function fn_check($form,$trig){
-					var err=false;
-					$form.find('*[fu-verify]').each(function(){
-						var $verify=$(this);
-						var name=$verify.attr('name');
-						var verify=$verify.F('Verify');
-						if(verify){
-							err=err || [];
-							err.push(verify);
-							return true;
-						};
-					});
-					return err;
-			};
-			*/
 			//表单submit事件
-			$this.off('submit.FU').on('submit.FU', function(event) {
+			$this.off('submit.Form').on('submit.Form', function(event) {
 				//阻止默认事件
 				event.preventDefault();
 				var $form = $(this);
@@ -970,7 +950,7 @@
 				var postData = {};
 				//执行前
 				(F['beforeCall'][call] || $.noop)($form);
-
+				var err=false;
 				//数据遍历
 				$form.find('[name],[fu-name]').each(function(index, element) {
 					var $this = $(this);
@@ -986,9 +966,17 @@
 						}).get().join(",");
 						return true;
 					};
-
+					//数据验证
+					var type=$this.attr('fu-verify');
+					var verify=F['Verify'](type,val);
+					if(verify.err){
+						err=true;
+						F['Hint']({ct:verify.ct,type:2});
+						return false;
+					};
 					postData[name] = val;
 				});
+				if(err){return false};
 				//额外提交数据
 				postData = $.extend({}, postData, set['data']);
 
@@ -1035,7 +1023,7 @@
 			});
 
 			//表单输入框的按键事件
-			$this.find('input[name],textarea[name],select[name]').on('keydown.FU', function(event) {
+			$this.find('input[name],textarea[name],select[name]').off('keydown.Form').on('keydown.Form', function(event) {
 				var $this = $(this);
 				var $form = $this.parents(selector).first();
 				var key = event.keyCode;
@@ -1048,13 +1036,13 @@
 			});
 
 			//表单下的按钮事件
-			$this.find(set['submit']).on('click.FU', function(event) {
+			$this.find(set['submit']).off('FU_tap.Form').on('FU_tap.Form', function(event) {
 				var $this = $(this);
 				var $form = $this.parents(selector).first();
 				if ($this.is('.z-loading') || $this.is('.z-lock')) {
 					return false;
 				}
-				$form.trigger("submit.FU");
+				$form.trigger("submit.Form");
 			});
 		});
 		return $this;
@@ -1363,14 +1351,16 @@
 		//-文档准备就绪初始化UI组件
 		F['Ui']['init']();
 		//-滚动条宽度
-		(function(){
-			$('body').append('<div class="f-FU_scrollWidth"><div></div></div>');
-			var $scrollWidth=$('.f-FU_scrollWidth');
-			var no_scroll=$scrollWidth.children().width();
-			var is_scroll=$scrollWidth.css('overflow-y','scroll').children().width();
-			F.scrollbar_width= (no_scroll - is_scroll) || 0;
-			$scrollWidth.remove();
-		})();
+		if(!F['is_touch']){
+			(function(){
+				$('body').append('<div class="f-FU_scrollWidth"><div></div></div>');
+				var $scrollWidth=$('.f-FU_scrollWidth');
+				var no_scroll=$scrollWidth.children().width();
+				var is_scroll=$scrollWidth.css('overflow-y','scroll').children().width();
+				F.scrollbar_width= (no_scroll - is_scroll) || 0;
+				$scrollWidth.remove();
+			})();
+		}
 		//初始化弹层
 		F['Modal']['init']();
 		//初始化表单提交

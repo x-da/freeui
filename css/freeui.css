@@ -117,7 +117,7 @@ html {
 }
 
 body {
-    font-family: "Microsoft YaHei", Tahoma, SimSun;
+    font-family: "Alright Sans LP", "Avenir Next", "Helvetica Neue", Helvetica, Arial, "PingFang SC", "Source Han Sans SC", "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi MicroHei", sans-serif;
     position: relative;
     line-height: 1;
     color: #666;
@@ -205,11 +205,24 @@ input[type="checkbox"]:focus {
     box-shadow: none;
 }
 
-html.s-wap{ -webkit-user-select:none; }
+html.s-wap {
+    -webkit-user-select: none;
+}
+
 
 /*--- 获得最佳rem效果 ---*/
-@viewport {width: device-width;zoom: 1;}
-@media screen and (max-width: 600px) {html{font-size: 80px;}}
+
+@viewport {
+    width: device-width;
+    zoom: 1;
+}
+
+@media screen and (max-width: 600px) {
+    html {
+        font-size: 80px;
+    }
+}
+
 
 /*--- 方法 ---*/
 
@@ -296,8 +309,19 @@ html.s-wap{ -webkit-user-select:none; }
     filter: progid: DXImageTransform.Microsoft.Blur(PixelRadius='5');
 }
 
-.f-FU_scrollWidth{ position:absolute; left: -200px; width: 100px; height: 100px; overflow-y: hidden; top: -100px;}
-.f-FU_scrollWidth div{ height: 200px;}
+.f-FU_scrollWidth {
+    position: absolute;
+    left: -200px;
+    width: 100px;
+    height: 100px;
+    overflow-y: hidden;
+    top: -100px;
+}
+
+.f-FU_scrollWidth div {
+    height: 200px;
+}
+
 
 /*--- 风格 ---*/
 
@@ -395,18 +419,23 @@ html.s-wap{ -webkit-user-select:none; }
 
 /*--- UI层 ---*/
 
+
 /*--Loading--*/
+
+
 /*-低级浏览器-*/
+
 .u-FU_loading.s-low {
-	width: 1em;
-	height: 1em;
-}
-.u-FU_loading.s-low img{
-	width: 100%;
-	height: 100%;
+    width: 1em;
+    height: 1em;
 }
 
-.u-FU_loading.s-default{
+.u-FU_loading.s-low img {
+    width: 100%;
+    height: 100%;
+}
+
+.u-FU_loading.s-default {
     display: inline-block;
     display: none \9;
     position: relative;
@@ -714,15 +743,14 @@ html.s-wap{ -webkit-user-select:none; }
 .u-FU_number {
     display: inline-block;
     vertical-align: middle;
-    border:1px solid #bbbbbb;
+    border: 1px solid #bbbbbb;
     border-radius: 3px;
     overflow: hidden;
 }
 
-
-.u-FU_number > .p-input{
-	overflow: hidden;
-	padding-left: 10px;
+.u-FU_number > .p-input {
+    overflow: hidden;
+    padding-left: 10px;
 }
 
 .u-FU_number input {
@@ -732,13 +760,15 @@ html.s-wap{ -webkit-user-select:none; }
     height: 32px;
     line-height: 32px \9;
     border-radius: 0;
-    border:none;
+    border: none;
     outline: none;
     padding: 0 5px;
     margin-left: -10px;
 }
 
-.u-FU_number.S-block input{ width: 100%; }
+.u-FU_number.S-block input {
+    width: 100%;
+}
 
 .u-FU_number input:focus {
     border-color: #2185D0;
@@ -760,9 +790,18 @@ html.s-wap{ -webkit-user-select:none; }
     -webkit-user-select: none;
     -moz-user-select: none;
 }
-.u-FU_number .p-btn:active{background-color: #f2f2f2;}
-.u-FU_number .p-btn.f-fl{ border-right: 1px solid #ccc; }
-.u-FU_number .p-btn.f-fr{ border-left: 1px solid #ccc; }
+
+.u-FU_number .p-btn:active {
+    background-color: #f2f2f2;
+}
+
+.u-FU_number .p-btn.f-fl {
+    border-right: 1px solid #ccc;
+}
+
+.u-FU_number .p-btn.f-fr {
+    border-left: 1px solid #ccc;
+}
 
 
 /*-单选复选框-*/
@@ -777,7 +816,8 @@ html.s-wap{ -webkit-user-select:none; }
     -webkit-transition: all 0.2s linear;
 }
 
-.u-FU_check i {
+.u-FU_check > i {
+    position: relative;
     font-size: 1em;
     vertical-align: middle;
     width: 1.2em;
@@ -802,20 +842,27 @@ html.s-wap{ -webkit-user-select:none; }
     color: #E0E0E0;
 }
 
-.u-FU_check i:before {
+.u-FU_check > i:before {
     content: "\e619";
 }
 
-.u-FU_check.z-checked i:before {
-    content: "\e61b";
+.u-FU_check > i:after {
+    position: absolute;
+    left: 0;
+    color:#333;
 }
 
-.u-FU_check.s-radio i:before {
+.u-FU_check.z-checked > i:after {
+    content: "\e60e";
+}
+.u-FU_check.s-radio > i:before{
     content: "\e61d";
 }
-
-.u-FU_check.s-radio.z-checked i:before {
-    content: "\e610";
+.u-FU_check.s-radio.z-checked > i:after {
+    content: "\e626";
+    font-size: 1.2em;
+    top: 50%;margin-top: -0.58em;
+    left: 50%; margin-left: -0.4em;
 }
 
 
@@ -1043,13 +1090,17 @@ html.s-wap{ -webkit-user-select:none; }
     background-color: #fafafb;
 }
 
+
 /*首列不换行*/
-.u-FU_table.s-1colNowrap tr td:first-child{
+
+.u-FU_table.s-1colNowrap tr td:first-child {
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
     word-break: keep-all;
 }
+
+
 /*--- JS依赖CSS ---*/
 
 
@@ -1059,7 +1110,7 @@ html.s-wap{ -webkit-user-select:none; }
     background-color: #000;
     opacity: 0.6;
     filter: alpha(opacity=60);
-    position:fixed;
+    position: fixed;
     left: 0;
     top: 0;
     width: 100%;
@@ -1153,7 +1204,6 @@ html.s-wap{ -webkit-user-select:none; }
 .m-FU_modal > .p-ct {
     font-size: 14px;
     margin: 10px;
-
 }
 
 .m-FU_modal {
@@ -1182,16 +1232,18 @@ html.s-wap{ -webkit-user-select:none; }
     text-align: center;
     z-index: 5;
     cursor: pointer;
-    color:#d4d4d4;
+    color: #d4d4d4;
 }
-.m-FU_modal .p-close:hover{
+
+.m-FU_modal .p-close:hover {
     color: #F44F53;
 }
+
 .m-FU_modal > .p-ct {
     overflow-y: auto;
     line-height: 1.4;
     -webkit-overflow-scrolling: touch;
-    overflow-y:auto;
+    overflow-y: auto;
 }
 
 .m-FU_modal.s-mid {
@@ -1199,7 +1251,517 @@ html.s-wap{ -webkit-user-select:none; }
 }
 
 
-/*--- CSS3动画 ---*/
+/*--- CSS3动画库 ---*/
+
+
+/*- 淡入系列 -*/
+
+.a-FU_fadeIn {
+    -webkit-animation: FU_fadeIn .3s ease both;
+    -moz-animation: FU_fadeIn .3s ease both;
+    -ms-animation: FU_fadeIn .3s ease both;
+    animation: FU_fadeIn .3s ease both;
+}
+
+;
+@-webkit-keyframes FU_fadeIn {
+    0% {
+        opacity: 0
+    }
+    100% {
+        opacity: 1
+    }
+}
+
+@-moz-keyframes FU_fadeIn {
+    0% {
+        opacity: 0
+    }
+    100% {
+        opacity: 1
+    }
+}
+
+@-ms-keyframes FU_fadeIn {
+    0% {
+        opacity: 0
+    }
+    100% {
+        opacity: 1
+    }
+}
+
+@keyframes FU_fadeIn {
+    0% {
+        opacity: 0
+    }
+    100% {
+        opacity: 1
+    }
+}
+
+.a-FU_fadeInL {
+    -webkit-animation: FU_fadeInL .3s ease both;
+    -moz-animation: FU_fadeInL .3s ease both;
+    -ms-animation: FU_fadeInL .3s ease both;
+    animation: FU_fadeInL .3s ease both;
+}
+
+;
+@-webkit-keyframes FU_fadeInL {
+    0% {
+        opacity: 0;
+        -webkit-transform: translateX(-10%);
+    }
+    100% {
+        opacity: 1;
+        -webkit-transform: translateX(0);
+    }
+}
+
+@-moz-keyframes FU_fadeInL {
+    0% {
+        opacity: 0;
+        -moz-transform: translateX(-10%);
+    }
+    100% {
+        opacity: 1;
+        -moz-transform: translateX(0);
+    }
+}
+
+@-ms-keyframes FU_fadeInL {
+    0% {
+        opacity: 0;
+        -ms-transform: translateX(-10%);
+    }
+    100% {
+        opacity: 1;
+        -ms-transform: translateX(0);
+    }
+}
+
+@keyframes FU_fadeInL {
+    0% {
+        opacity: 0;
+        transform: translateX(-10%);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.a-FU_fadeInR {
+    -webkit-animation: FU_fadeInR .3s ease both;
+    -moz-animation: FU_fadeInR .3s ease both;
+    -ms-animation: FU_fadeInR .3s ease both;
+    animation: FU_fadeInR .3s ease both;
+}
+
+;
+@-webkit-keyframes FU_fadeInR {
+    0% {
+        opacity: 0;
+        -webkit-transform: translateX(10%);
+    }
+    100% {
+        opacity: 1;
+        -webkit-transform: translateX(0);
+    }
+}
+
+@-moz-keyframes FU_fadeInR {
+    0% {
+        opacity: 0;
+        -moz-transform: translateX(10%);
+    }
+    100% {
+        opacity: 1;
+        -moz-transform: translateX(0);
+    }
+}
+
+@-ms-keyframes FU_fadeInR {
+    0% {
+        opacity: 0;
+        -ms-transform: translateX(10%);
+    }
+    100% {
+        opacity: 1;
+        -ms-transform: translateX(0);
+    }
+}
+
+@keyframes FU_fadeInR {
+    0% {
+        opacity: 0;
+        transform: translateX(10%);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.a-FU_fadeInT {
+    -webkit-animation: FU_fadeInT .3s ease both;
+    -moz-animation: FU_fadeInT .3s ease both;
+    -ms-animation: FU_fadeInT .3s ease both;
+    animation: FU_fadeInT .3s ease both;
+}
+
+;
+@-webkit-keyframes FU_fadeInT {
+    0% {
+        opacity: 0;
+        -webkit-transform: translateY(-10%);
+    }
+    100% {
+        opacity: 1;
+        -webkit-transform: translateY(0);
+    }
+}
+
+@-moz-keyframes FU_fadeInT {
+    0% {
+        opacity: 0;
+        -moz-transform: translateY(-10%);
+    }
+    100% {
+        opacity: 1;
+        -moz-transform: translateY(0);
+    }
+}
+
+@-ms-keyframes FU_fadeInT {
+    0% {
+        opacity: 0;
+        -ms-transform: translateY(-10%);
+    }
+    100% {
+        opacity: 1;
+        -ms-transform: translateY(0);
+    }
+}
+
+@keyframes FU_fadeInT {
+    0% {
+        opacity: 0;
+        transform: translateY(-10%);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.a-FU_fadeInB {
+    -webkit-animation: FU_fadeInB .3s ease both;
+    -moz-animation: FU_fadeInB .3s ease both;
+    -ms-animation: FU_fadeInB .3s ease both;
+    animation: FU_fadeInB .3s ease both;
+}
+
+;
+@-webkit-keyframes FU_fadeInB {
+    0% {
+        opacity: 0;
+        -webkit-transform: translateY(10%);
+    }
+    100% {
+        opacity: 1;
+        -webkit-transform: translateY(0);
+    }
+}
+
+@-moz-keyframes FU_fadeInB {
+    0% {
+        opacity: 0;
+        -moz-transform: translateY(10%);
+    }
+    100% {
+        opacity: 1;
+        -moz-transform: translateY(0);
+    }
+}
+
+@-ms-keyframes FU_fadeInB {
+    0% {
+        opacity: 0;
+        -ms-transform: translateY(10%);
+    }
+    100% {
+        opacity: 1;
+        -ms-transform: translateY(0);
+    }
+}
+
+@keyframes FU_fadeInB {
+    0% {
+        opacity: 0;
+        transform: translateY(10%);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+/*- 淡出 -*/
+
+.a-FU_fadeOut {
+    -webkit-animation: FU_fadeOut .3s ease both;
+    -moz-animation: FU_fadeOut .3s ease both;
+    -ms-animation: FU_fadeOut .3s ease both;
+    animation: FU_fadeOut .3s ease both;
+}
+
+;
+@-webkit-keyframes FU_fadeOut {
+    0% {
+        opacity: 1
+    }
+    100% {
+        opacity: 0
+    }
+}
+
+@-moz-keyframes FU_fadeOut {
+    0% {
+        opacity: 1
+    }
+    100% {
+        opacity: 0
+    }
+}
+
+@-ms-keyframes FU_fadeOut {
+    0% {
+        opacity: 1
+    }
+    100% {
+        opacity: 0
+    }
+}
+
+@keyframes FU_fadeOut {
+    0% {
+        opacity: 1
+    }
+    100% {
+        opacity: 0
+    }
+}
+
+.a-FU_fadeOutL {
+    -webkit-animation: FU_fadeOutL .3s ease both;
+    -moz-animation: FU_fadeOutL .3s ease both;
+    -ms-animation: FU_fadeOutL .3s ease both;
+    animation: FU_fadeOutL .3s ease both;
+}
+
+;
+@-webkit-keyframes FU_fadeOutL {
+    0% {
+        opacity: 1;
+        -webkit-transform: translateX(0);
+    }
+    100% {
+        opacity: 0;
+        -webkit-transform: translateX(-10%);
+    }
+}
+
+@-moz-keyframes FU_fadeOutL {
+    0% {
+        opacity: 1;
+        -moz-transform: translateX(0);
+    }
+    100% {
+        opacity: 0;
+        -moz-transform: translateX(-10%);
+    }
+}
+
+@-ms-keyframes FU_fadeOutL {
+    0% {
+        opacity: 1;
+        -ms-transform: translateX(0);
+    }
+    100% {
+        opacity: 0;
+        -ms-transform: translateX(-10%);
+    }
+}
+
+@keyframes FU_fadeOutL {
+    0% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-10%);
+    }
+}
+
+.a-FU_fadeOutR {
+    -webkit-animation: FU_fadeOutR .3s ease both;
+    -moz-animation: FU_fadeOutR .3s ease both;
+    -ms-animation: FU_fadeOutR .3s ease both;
+    animation: FU_fadeOutR .3s ease both;
+}
+
+;
+@-webkit-keyframes FU_fadeOutR {
+    0% {
+        opacity: 1;
+        -webkit-transform: translateX(0);
+    }
+    100% {
+        opacity: 0;
+        -webkit-transform: translateX(10%);
+    }
+}
+
+@-moz-keyframes FU_fadeOutR {
+    0% {
+        opacity: 1;
+        -moz-transform: translateX(0);
+    }
+    100% {
+        opacity: 0;
+        -moz-transform: translateX(10%);
+    }
+}
+
+@-ms-keyframes FU_fadeOutR {
+    0% {
+        opacity: 1;
+        -ms-transform: translateX(0);
+    }
+    100% {
+        opacity: 0;
+        -ms-transform: translateX(10%);
+    }
+}
+
+@keyframes FU_fadeOutR {
+    0% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(10%);
+    }
+}
+
+.a-FU_fadeOutT {
+    -webkit-animation: FU_fadeOutT .3s ease both;
+    -moz-animation: FU_fadeOutT .3s ease both;
+    -ms-animation: FU_fadeOutT .3s ease both;
+    animation: FU_fadeOutT .3s ease both;
+}
+
+;
+@-webkit-keyframes FU_fadeOutT {
+    0% {
+        opacity: 1;
+        -webkit-transform: translateY(0);
+    }
+    100% {
+        opacity: 0;
+        -webkit-transform: translateY(-10%);
+    }
+}
+
+@-moz-keyframes FU_fadeOutT {
+    0% {
+        opacity: 1;
+        -moz-transform: translateY(0);
+    }
+    100% {
+        opacity: 0;
+        -moz-transform: translateY(-10%);
+    }
+}
+
+@-ms-keyframes FU_fadeOutT {
+    0% {
+        opacity: 1;
+        -ms-transform: translateY(0);
+    }
+    100% {
+        opacity: 0;
+        -ms-transform: translateY(-10%);
+    }
+}
+
+@keyframes FU_fadeOutT {
+    0% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-10%);
+    }
+}
+
+.a-FU_fadeOutB {
+    -webkit-animation: FU_fadeOutB .3s ease both;
+    -moz-animation: FU_fadeOutB .3s ease both;
+    -ms-animation: FU_fadeOutB .3s ease both;
+    animation: FU_fadeOutB .3s ease both;
+}
+
+;
+@-webkit-keyframes FU_fadeOutB {
+    0% {
+        opacity: 1;
+        -webkit-transform: translateY(0);
+    }
+    100% {
+        opacity: 0;
+        -webkit-transform: translateY(10%);
+    }
+}
+
+@-moz-keyframes FU_fadeOutB {
+    0% {
+        opacity: 1;
+        -moz-transform: translateY(0);
+    }
+    100% {
+        opacity: 0;
+        -moz-transform: translateY(10%);
+    }
+}
+
+@-ms-keyframes FU_fadeOutB {
+    0% {
+        opacity: 1;
+        -ms-transform: translateY(0);
+    }
+    100% {
+        opacity: 0;
+        -ms-transform: translateY(10%);
+    }
+}
+
+@keyframes FU_fadeOutB {
+    0% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(10%);
+    }
+}
 
 
 /*fadeInBot*/
